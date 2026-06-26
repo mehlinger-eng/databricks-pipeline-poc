@@ -1,0 +1,32 @@
+---
+description: Project operating model for the Databricks Free Edition lakehouse learning project
+alwaysApply: true
+---
+
+# Project Operating Model
+
+This repo is a Databricks Free Edition learning project built as a realistic, business-oriented lakehouse pipeline.
+
+## Architecture Defaults
+
+- Use a medallion structure: bronze for raw inputs, silver for cleaned/conformed data, and gold for business-ready serving tables.
+- Keep data volumes small enough for Databricks Free Edition and local development.
+- Prefer reproducible scripts, notebooks, SQL, and declarative pipeline definitions over manual workspace-only steps.
+- Document architectural choices where they affect cost, reliability, maintainability, or business outcomes.
+
+## Engineering Standards
+
+- Keep transformations testable and modular when possible.
+- Avoid hardcoded secrets, personal workspace paths, and environment-specific IDs.
+- Favor explicit schemas and data contracts for important datasets.
+- Add data quality checks where bad data would change business decisions.
+- Keep notebooks readable, but move stable logic into reusable source files as the project matures.
+
+## Business Framing
+
+For every major pipeline or model, identify:
+
+- The business user.
+- The decision being improved.
+- The metric or operational outcome affected.
+- The serving surface: dashboard, SQL mart, prediction table, API, or app.

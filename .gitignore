@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+
+# Databricks
+.databricks/
+.bundle/
+.ai-dev-kit/
+.cursor/mcp.json
+
+# Local environment
+.env
+.env.*
+!.env.example
+
+# OS/editor
+.DS_Store
+.idea/
+.vscode/
+
+# Generated data
+data/
+tmp/
