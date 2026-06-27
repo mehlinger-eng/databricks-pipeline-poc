@@ -2,15 +2,19 @@
 
 ## Working Title
 
-Retail Lakehouse Intelligence
+NorthMart Retail Lakehouse Intelligence
+
+## Client
+
+NorthMart Outfitters, a fictional regional outdoor and lifestyle retailer.
 
 ## One-Line Pitch
 
-Build a Databricks lakehouse that turns messy retail operations data into demand, inventory, and stockout-risk intelligence.
+Build a Databricks lakehouse that turns NorthMart's fragmented retail operations data into demand, inventory, and stockout-risk intelligence.
 
 ## Business Problem
 
-Retail planners need to prevent stockouts before they happen, but the signals are fragmented across sales transactions, inventory snapshots, product catalogs, promotions, store metadata, holidays, weather, and local events.
+NorthMart planners need to prevent stockouts before they happen, but the signals are fragmented across sales transactions, inventory snapshots, product catalogs, promotions, store metadata, holidays, weather, and local events.
 
 The learning project should show how a lakehouse architecture creates a trusted analytical foundation and then serves decision-ready insights.
 

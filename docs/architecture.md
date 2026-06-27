@@ -2,7 +2,7 @@
 
 ## Data Sources
 
-Initial sources can be synthetic, public, or hybrid.
+Use a hybrid sourcing strategy. NorthMart-specific master data and business events are simulated, while demand and stockout behavior can be anchored by a compact public retail dataset sample.
 
 - Sales transactions: order line grain with timestamp, store, product, quantity, and revenue.
 - Inventory snapshots: daily store-product on-hand quantity.
@@ -11,6 +11,8 @@ Initial sources can be synthetic, public, or hybrid.
 - Promotions: promotion windows, discount depth, and product coverage.
 - Calendar: holidays, weekdays, paydays, and seasonal flags.
 - Weather or events: external demand signals by location and date.
+
+The first public dataset candidate is FreshRetailNet-50K because it includes sales, stockout annotations, discounts, holidays, and weather covariates. Walmart M5 remains a fallback for classic sales forecasting, but it is not the first choice because it lacks explicit stockout status.
 
 ## Medallion Layers
 
@@ -64,3 +66,7 @@ The first version should emphasize explainability and integration into the lakeh
 - Avoid GPU-dependent models.
 - Keep jobs small and avoid unnecessary parallel task fanout.
 - Design the first pipeline as a thin vertical slice before expanding breadth.
+
+## Incremental Strategy
+
+Start with a static 90-day slice. Add incremental behavior later through a replay harness that lands one `run_date` or `batch_id` at a time into raw volume paths, then re-runs the same bronze, silver, and gold logic.

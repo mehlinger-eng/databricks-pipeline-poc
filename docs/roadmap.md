@@ -8,7 +8,7 @@
 
 ## Phase 1: Thin Vertical Slice
 
-- Generate or ingest a small coherent retail dataset.
+- Generate and ingest a small coherent hybrid retail dataset.
 - Land raw files in a Unity Catalog volume.
 - Build bronze ingestion tables.
 - Build one silver fact table and one or two dimensions.
@@ -19,7 +19,7 @@
 
 - Expand the source set to sales, inventory, products, stores, promotions, calendar, and external signals.
 - Add data quality checks.
-- Add incremental ingestion patterns.
+- Add replay-based incremental ingestion patterns.
 - Add late-arriving and corrected record handling.
 - Package pipeline assets for deployment.
 
