@@ -13,3 +13,5 @@ resources:
       libraries:
         - file:
             path: ../pipelines/northmart_bronze.py
+        - file:
+            path: ../pipelines/northmart_silver_gold.py

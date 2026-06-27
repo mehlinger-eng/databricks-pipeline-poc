@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This checkpoint introduces the first Databricks Lakeflow Declarative Pipeline scaffold for NorthMart. It focuses only on bronze ingestion.
+This checkpoint introduced the first Databricks Lakeflow Declarative Pipeline scaffold for NorthMart. It started with bronze ingestion and now feeds the repo-scaffolded medallion pipeline described in `docs/databricks-medallion-pipeline.md`.
 
 The pipeline is written in PySpark and is designed to read the generated NorthMart thin-slice CSV files after they are uploaded to a Unity Catalog volume.
 
@@ -63,7 +63,7 @@ The project uses PySpark Lakeflow Declarative Pipelines for this layer because:
 
 ## Next Decision
 
-After this scaffold, choose one of two paths:
+After the repo-scaffolded medallion logic, choose one of two paths:
 
-- Upload generated files to a Unity Catalog volume and deploy the bronze pipeline.
-- Add silver conformance logic in PySpark before deploying.
+- Upload generated files to a Unity Catalog volume and deploy the pipeline.
+- Continue refining transformations locally before first deployment.
