@@ -1,0 +1,42 @@
+name: fact_sales
+layer: silver
+description: Conformed daily sales or observed demand fact.
+grain: one row per store, product, and business date
+primary_key:
+  - store_key
+  - product_key
+  - date_key
+columns:
+  - name: store_key
+    type: string
+    required: true
+  - name: product_key
+    type: string
+    required: true
+  - name: date_key
+    type: date
+    required: true
+  - name: observed_units
+    type: double
+    required: true
+  - name: normalized_sales_amount
+    type: double
+    required: true
+  - name: estimated_revenue
+    type: decimal(12,2)
+    required: true
+  - name: source_dataset
+    type: string
+    required: true
+  - name: batch_id
+    type: string
+    required: true
+  - name: processed_at
+    type: timestamp
+    required: true
+quality_checks:
+  - observed_units >= 0
+  - normalized_sales_amount >= 0
+  - estimated_revenue >= 0
+notes:
+  - `estimated_revenue` is modeled for NorthMart business storytelling and should be derived from observed demand and synthetic product pricing.

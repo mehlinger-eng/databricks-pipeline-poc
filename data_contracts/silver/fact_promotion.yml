@@ -1,0 +1,38 @@
+name: fact_promotion
+layer: silver
+description: Conformed daily promotion and discount fact.
+grain: one row per store, product, and business date
+primary_key:
+  - store_key
+  - product_key
+  - date_key
+columns:
+  - name: store_key
+    type: string
+    required: true
+  - name: product_key
+    type: string
+    required: true
+  - name: date_key
+    type: date
+    required: true
+  - name: promotion_flag
+    type: boolean
+    required: true
+  - name: discount_rate
+    type: double
+    required: true
+  - name: campaign_name
+    type: string
+    required: false
+  - name: batch_id
+    type: string
+    required: true
+  - name: processed_at
+    type: timestamp
+    required: true
+quality_checks:
+  - discount_rate >= 0
+  - discount_rate < 1
+notes:
+  - FreshRetailNet uses a remaining-price multiplier where `1.0` means no discount. Silver converts this into a NorthMart-style discount rate.

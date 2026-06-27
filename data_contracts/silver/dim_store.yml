@@ -1,0 +1,45 @@
+name: dim_store
+layer: silver
+description: Conformed NorthMart store dimension.
+grain: one row per NorthMart store
+primary_key:
+  - store_key
+columns:
+  - name: store_key
+    type: string
+    required: true
+  - name: source_store_id
+    type: bigint
+    required: false
+  - name: store_name
+    type: string
+    required: true
+  - name: region
+    type: string
+    required: true
+  - name: state
+    type: string
+    required: true
+  - name: city
+    type: string
+    required: true
+  - name: store_format
+    type: string
+    required: true
+  - name: climate_zone
+    type: string
+    required: true
+  - name: effective_start_date
+    type: date
+    required: true
+  - name: effective_end_date
+    type: date
+    required: false
+  - name: is_current
+    type: boolean
+    required: true
+quality_checks:
+  - store_key is not null
+  - is_current in (true, false)
+notes:
+  - Start as Type 1 or current-state only. Add SCD behavior later if store attributes change.

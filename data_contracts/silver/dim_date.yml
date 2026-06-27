@@ -1,0 +1,40 @@
+name: dim_date
+layer: silver
+description: Conformed date dimension for daily planning, seasonality, holidays, and replenishment windows.
+grain: one row per calendar date
+primary_key:
+  - date_key
+columns:
+  - name: date_key
+    type: date
+    required: true
+  - name: day_of_week
+    type: string
+    required: true
+  - name: week_start_date
+    type: date
+    required: true
+  - name: month
+    type: int
+    required: true
+  - name: quarter
+    type: int
+    required: true
+  - name: year
+    type: int
+    required: true
+  - name: is_weekend
+    type: boolean
+    required: true
+  - name: is_holiday
+    type: boolean
+    required: true
+  - name: planning_season
+    type: string
+    required: true
+quality_checks:
+  - date_key is not null
+  - month between 1 and 12
+  - quarter between 1 and 4
+notes:
+  - Use source holiday flags for the first slice. Add regional holiday/event logic later.

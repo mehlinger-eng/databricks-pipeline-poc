@@ -1,0 +1,89 @@
+name: raw_freshretailnet_daily
+layer: bronze
+description: Source-shaped daily FreshRetailNet-50K rows used as the behavioral anchor for NorthMart demand and stockout patterns.
+source: Dingdong-Inc/FreshRetailNet-50K
+grain: one row per source city, store, product, and business date
+primary_key:
+  - city_id
+  - store_id
+  - product_id
+  - dt
+columns:
+  - name: city_id
+    type: bigint
+    required: true
+  - name: store_id
+    type: bigint
+    required: true
+  - name: management_group_id
+    type: bigint
+    required: true
+  - name: first_category_id
+    type: bigint
+    required: true
+  - name: second_category_id
+    type: bigint
+    required: true
+  - name: third_category_id
+    type: bigint
+    required: true
+  - name: product_id
+    type: bigint
+    required: true
+  - name: dt
+    type: date
+    required: true
+  - name: sale_amount
+    type: double
+    required: true
+  - name: hours_sale
+    type: array<double>
+    required: false
+  - name: stock_hour6_22_cnt
+    type: int
+    required: true
+  - name: hours_stock_status
+    type: array<int>
+    required: false
+  - name: discount
+    type: double
+    required: true
+  - name: holiday_flag
+    type: int
+    required: true
+  - name: activity_flag
+    type: int
+    required: true
+  - name: precpt
+    type: double
+    required: false
+  - name: avg_temperature
+    type: double
+    required: false
+  - name: avg_humidity
+    type: double
+    required: false
+  - name: avg_wind_level
+    type: double
+    required: false
+  - name: source_dataset
+    type: string
+    required: true
+  - name: source_split
+    type: string
+    required: true
+  - name: batch_id
+    type: string
+    required: true
+  - name: ingested_at
+    type: timestamp
+    required: true
+quality_checks:
+  - sale_amount >= 0
+  - stock_hour6_22_cnt between 0 and 17
+  - discount > 0 and discount <= 1
+  - holiday_flag in (0, 1)
+  - activity_flag in (0, 1)
+notes:
+  - Preserve source identifiers in bronze. Do not rename them to NorthMart keys until silver.
+  - The source sales amount is normalized and should not be interpreted as literal dollars.

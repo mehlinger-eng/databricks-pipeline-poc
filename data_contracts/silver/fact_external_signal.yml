@@ -1,0 +1,45 @@
+name: fact_external_signal
+layer: silver
+description: Conformed daily weather, holiday, and event context used to explain demand variation.
+grain: one row per store and business date
+primary_key:
+  - store_key
+  - date_key
+columns:
+  - name: store_key
+    type: string
+    required: true
+  - name: date_key
+    type: date
+    required: true
+  - name: is_holiday
+    type: boolean
+    required: true
+  - name: local_event_flag
+    type: boolean
+    required: true
+  - name: precipitation
+    type: double
+    required: false
+  - name: avg_temperature
+    type: double
+    required: false
+  - name: avg_humidity
+    type: double
+    required: false
+  - name: avg_wind_level
+    type: double
+    required: false
+  - name: demand_signal_bucket
+    type: string
+    required: true
+  - name: batch_id
+    type: string
+    required: true
+  - name: processed_at
+    type: timestamp
+    required: true
+quality_checks:
+  - demand_signal_bucket in ('normal', 'weather_sensitive', 'holiday', 'event', 'compound')
+notes:
+  - Weather values initially come from the public source covariates. Local events are synthetic and can be expanded later.

@@ -1,0 +1,47 @@
+name: northmart_store_master
+layer: bronze
+description: Synthetic NorthMart store master data used to map public source stores into the fictional client operating model.
+source: synthetic
+grain: one row per NorthMart store
+primary_key:
+  - northmart_store_id
+columns:
+  - name: northmart_store_id
+    type: string
+    required: true
+  - name: source_store_id
+    type: bigint
+    required: false
+  - name: store_name
+    type: string
+    required: true
+  - name: region
+    type: string
+    required: true
+  - name: state
+    type: string
+    required: true
+  - name: city
+    type: string
+    required: true
+  - name: store_format
+    type: string
+    required: true
+  - name: climate_zone
+    type: string
+    required: true
+  - name: opened_date
+    type: date
+    required: false
+  - name: batch_id
+    type: string
+    required: true
+  - name: ingested_at
+    type: timestamp
+    required: true
+quality_checks:
+  - northmart_store_id is not null
+  - region in ('Rockies', 'Wasatch', 'Northern Plains', 'High Desert')
+  - store_format in ('flagship', 'standard', 'outlet')
+notes:
+  - This table is small and synthetic. It should not contain real customer or employee data.

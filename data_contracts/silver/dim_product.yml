@@ -1,0 +1,43 @@
+name: dim_product
+layer: silver
+description: Conformed NorthMart product dimension.
+grain: one row per NorthMart product
+primary_key:
+  - product_key
+columns:
+  - name: product_key
+    type: string
+    required: true
+  - name: source_product_id
+    type: bigint
+    required: false
+  - name: product_name
+    type: string
+    required: true
+  - name: category
+    type: string
+    required: true
+  - name: subcategory
+    type: string
+    required: true
+  - name: brand
+    type: string
+    required: true
+  - name: replenishment_class
+    type: string
+    required: true
+  - name: base_unit_price
+    type: decimal(10,2)
+    required: true
+  - name: seasonal_peak
+    type: string
+    required: false
+  - name: is_active
+    type: boolean
+    required: true
+quality_checks:
+  - product_key is not null
+  - base_unit_price > 0
+  - is_active in (true, false)
+notes:
+  - Public source category identifiers should be preserved in bronze and mapped into NorthMart outdoor categories here.

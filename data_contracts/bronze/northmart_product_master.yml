@@ -1,0 +1,47 @@
+name: northmart_product_master
+layer: bronze
+description: Synthetic NorthMart product master data used to map public source products into outdoor retail categories.
+source: synthetic
+grain: one row per NorthMart product
+primary_key:
+  - northmart_product_id
+columns:
+  - name: northmart_product_id
+    type: string
+    required: true
+  - name: source_product_id
+    type: bigint
+    required: false
+  - name: product_name
+    type: string
+    required: true
+  - name: category
+    type: string
+    required: true
+  - name: subcategory
+    type: string
+    required: true
+  - name: brand
+    type: string
+    required: true
+  - name: replenishment_class
+    type: string
+    required: true
+  - name: base_unit_price
+    type: decimal(10,2)
+    required: true
+  - name: seasonal_peak
+    type: string
+    required: false
+  - name: batch_id
+    type: string
+    required: true
+  - name: ingested_at
+    type: timestamp
+    required: true
+quality_checks:
+  - northmart_product_id is not null
+  - base_unit_price > 0
+  - replenishment_class in ('fast', 'standard', 'slow', 'seasonal')
+notes:
+  - Product categories should support NorthMart's outdoor retail story even when behavior is anchored by public source product identifiers.

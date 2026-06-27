@@ -1,0 +1,88 @@
+name: gold_store_product_stockout_daily
+layer: gold
+description: Daily store-product stockout analysis mart for NorthMart inventory planners and store operations leaders.
+grain: one row per store, product, and business date
+primary_key:
+  - store_key
+  - product_key
+  - date_key
+consumers:
+  - Store Operations
+  - Inventory Planning
+  - Merchandising Analytics
+  - Data Science
+columns:
+  - name: store_key
+    type: string
+    required: true
+  - name: product_key
+    type: string
+    required: true
+  - name: date_key
+    type: date
+    required: true
+  - name: region
+    type: string
+    required: true
+  - name: store_format
+    type: string
+    required: true
+  - name: category
+    type: string
+    required: true
+  - name: subcategory
+    type: string
+    required: true
+  - name: replenishment_class
+    type: string
+    required: true
+  - name: observed_units
+    type: double
+    required: true
+  - name: estimated_revenue
+    type: decimal(12,2)
+    required: true
+  - name: stockout_hours
+    type: int
+    required: true
+  - name: stockout_flag
+    type: boolean
+    required: true
+  - name: promotion_flag
+    type: boolean
+    required: true
+  - name: discount_rate
+    type: double
+    required: true
+  - name: is_holiday
+    type: boolean
+    required: true
+  - name: demand_signal_bucket
+    type: string
+    required: true
+  - name: lost_sales_proxy
+    type: decimal(12,2)
+    required: true
+  - name: stockout_risk_score
+    type: double
+    required: false
+  - name: priority_tier
+    type: string
+    required: true
+  - name: refreshed_at
+    type: timestamp
+    required: true
+quality_checks:
+  - observed_units >= 0
+  - estimated_revenue >= 0
+  - lost_sales_proxy >= 0
+  - stockout_hours >= 0
+  - discount_rate >= 0
+  - discount_rate < 1
+  - priority_tier in ('low', 'medium', 'high', 'critical')
+business_questions:
+  - Which store-product combinations had the highest stockout exposure?
+  - Which promotions created unsupported demand?
+  - Where should inventory planners focus before the next replenishment cycle?
+notes:
+  - `stockout_risk_score` can start as a rules-based placeholder and later be replaced by an ML model output.

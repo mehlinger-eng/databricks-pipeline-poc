@@ -1,0 +1,43 @@
+name: fact_inventory_status
+layer: silver
+description: Conformed daily inventory and stockout status fact.
+grain: one row per store, product, and business date
+primary_key:
+  - store_key
+  - product_key
+  - date_key
+columns:
+  - name: store_key
+    type: string
+    required: true
+  - name: product_key
+    type: string
+    required: true
+  - name: date_key
+    type: date
+    required: true
+  - name: stockout_hours
+    type: int
+    required: true
+  - name: stockout_flag
+    type: boolean
+    required: true
+  - name: service_window_hours
+    type: int
+    required: true
+  - name: inventory_coverage_status
+    type: string
+    required: true
+  - name: batch_id
+    type: string
+    required: true
+  - name: processed_at
+    type: timestamp
+    required: true
+quality_checks:
+  - stockout_hours >= 0
+  - stockout_hours <= service_window_hours
+  - service_window_hours > 0
+  - inventory_coverage_status in ('healthy', 'watch', 'at_risk', 'stockout')
+notes:
+  - The first slice derives stockout status from FreshRetailNet stockout annotations rather than a literal NorthMart inventory count.
