@@ -36,3 +36,24 @@ REPLENISHMENT_CLASSES = (
     "seasonal",
 )
 
+NORTHMART_STATES = (
+    ("Colorado", "CO", "Rockies", "mountain"),
+    ("Utah", "UT", "Wasatch", "high_desert"),
+    ("Montana", "MT", "Northern Plains", "northern"),
+    ("Idaho", "ID", "Northern Plains", "mountain"),
+    ("Wyoming", "WY", "High Desert", "high_desert"),
+)
+
+STORE_FORMATS = ("flagship", "standard", "outlet")
+
+BRANDS = (
+    "SummitTrail",
+    "PineForge",
+    "Riverline",
+    "Snowcap",
+    "Trailhead",
+    "NorthRidge",
+)
+
+SEASONAL_PEAKS = ("spring", "summer", "fall", "winter", "year_round")
+

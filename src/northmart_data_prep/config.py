@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import asdict, dataclass
 from datetime import date
+from pathlib import Path
 
 
 @dataclass(frozen=True)
@@ -31,4 +32,8 @@ class ThinSliceConfig:
         values = asdict(self)
         values["start_date"] = self.start_date.isoformat()
         return values
+
+    @property
+    def output_path(self) -> Path:
+        return Path(self.output_root)
 
