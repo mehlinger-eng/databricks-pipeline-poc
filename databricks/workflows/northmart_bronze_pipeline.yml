@@ -1,0 +1,15 @@
+# Reference Databricks Asset Bundle resource for the future bronze Lakeflow
+# Declarative Pipeline. This file is not wired into a root databricks.yml yet.
+
+resources:
+  pipelines:
+    northmart_bronze_pipeline:
+      name: "[dev] northmart-bronze-pipeline"
+      catalog: ${var.catalog}
+      schema: ${var.schema}
+      serverless: true
+      configuration:
+        raw_data_path: /Volumes/${var.catalog}/${var.schema}/${var.raw_volume}/northmart_thin_slice
+      libraries:
+        - file:
+            path: ../pipelines/northmart_bronze.py
