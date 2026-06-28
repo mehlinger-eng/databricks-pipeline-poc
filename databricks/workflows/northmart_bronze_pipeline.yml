@@ -1,15 +1,21 @@
-# Reference Databricks Asset Bundle resource for the future bronze Lakeflow
-# Declarative Pipeline. This file is not wired into a root databricks.yml yet.
+# Databricks Asset Bundle resource for the NorthMart medallion Lakeflow
+# Declarative Pipeline. Included from the root databricks.yml.
+#
+# The pipeline targets the `catalog` default and spans the bronze/silver/gold
+# schemas through fully-qualified table names defined in the pipeline source.
+# `catalog` (Spark conf) and `raw_data_path` are passed via `configuration` so
+# the PySpark source can resolve fully-qualified names and the landing path.
 
 resources:
   pipelines:
     northmart_bronze_pipeline:
-      name: "[dev] northmart-bronze-pipeline"
+      name: "northmart-medallion-pipeline"
       catalog: ${var.catalog}
-      schema: ${var.schema}
+      schema: bronze
       serverless: true
       configuration:
-        raw_data_path: /Volumes/${var.catalog}/${var.schema}/${var.raw_volume}/northmart_thin_slice
+        catalog: ${var.catalog}
+        raw_data_path: ${var.raw_data_path}
       libraries:
         - file:
             path: ../pipelines/northmart_bronze.py

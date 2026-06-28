@@ -1,0 +1,26 @@
+bundle:
+  name: northmart-lakehouse
+
+# Variables drive the Unity Catalog target layout. The pipeline writes to a
+# single catalog and spans the bronze/silver/gold schemas via fully-qualified
+# table names defined in the pipeline source.
+variables:
+  catalog:
+    description: Target Unity Catalog catalog for all medallion schemas.
+    default: northmart
+  raw_volume:
+    description: Landing volume (in the bronze schema) for raw CSV files.
+    default: landing
+  raw_data_path:
+    description: Base path under the landing volume for thin-slice datasets.
+    default: /Volumes/${var.catalog}/bronze/${var.raw_volume}/northmart_thin_slice
+
+include:
+  - databricks/workflows/*.yml
+
+targets:
+  dev:
+    mode: development
+    default: true
+    workspace:
+      host: https://dbc-cc82131f-4015.cloud.databricks.com

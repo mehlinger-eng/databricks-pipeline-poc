@@ -6,17 +6,25 @@ from pyspark.sql import functions as F
 
 SERVICE_WINDOW_HOURS = 17
 
+# Per-layer fully-qualified prefixes. The pipeline targets a single catalog
+# (set via the `catalog` configuration key) and spans the bronze/silver/gold
+# schemas using fully-qualified dataset names.
+CATALOG = spark.conf.get("catalog")
+BRONZE = f"{CATALOG}.bronze"
+SILVER = f"{CATALOG}.silver"
+GOLD = f"{CATALOG}.gold"
+
 
 def raw_with_keys():
     return (
-        spark.read.table("bronze_raw_freshretailnet_daily").alias("raw")
+        spark.read.table(f"{BRONZE}.bronze_raw_freshretailnet_daily").alias("raw")
         .join(
-            spark.read.table("bronze_northmart_store_master").alias("store"),
+            spark.read.table(f"{BRONZE}.bronze_northmart_store_master").alias("store"),
             F.col("raw.store_id") == F.col("store.source_store_id"),
             "inner",
         )
         .join(
-            spark.read.table("bronze_northmart_product_master").alias("product"),
+            spark.read.table(f"{BRONZE}.bronze_northmart_product_master").alias("product"),
             F.col("raw.product_id") == F.col("product.source_product_id"),
             "inner",
         )
@@ -24,14 +32,14 @@ def raw_with_keys():
 
 
 @dp.table(
-    name="dim_store",
+    name=f"{SILVER}.dim_store",
     comment="Conformed NorthMart store dimension for the thin slice.",
     cluster_by=["region", "state"],
 )
 @dp.expect_or_drop("valid_store_key", "store_key IS NOT NULL")
 def dim_store():
     return (
-        spark.read.table("bronze_northmart_store_master")
+        spark.read.table(f"{BRONZE}.bronze_northmart_store_master")
         .select(
             F.col("northmart_store_id").alias("store_key"),
             "source_store_id",
@@ -50,7 +58,7 @@ def dim_store():
 
 
 @dp.table(
-    name="dim_product",
+    name=f"{SILVER}.dim_product",
     comment="Conformed NorthMart product dimension for the thin slice.",
     cluster_by=["category", "replenishment_class"],
 )
@@ -58,7 +66,7 @@ def dim_store():
 @dp.expect_or_drop("valid_base_unit_price", "base_unit_price > 0")
 def dim_product():
     return (
-        spark.read.table("bronze_northmart_product_master")
+        spark.read.table(f"{BRONZE}.bronze_northmart_product_master")
         .select(
             F.col("northmart_product_id").alias("product_key"),
             "source_product_id",
@@ -76,14 +84,14 @@ def dim_product():
 
 
 @dp.table(
-    name="dim_date",
+    name=f"{SILVER}.dim_date",
     comment="Conformed date dimension for the NorthMart thin slice.",
     cluster_by=["year", "month"],
 )
 @dp.expect_or_drop("valid_date_key", "date_key IS NOT NULL")
 def dim_date():
     return (
-        spark.read.table("bronze_raw_freshretailnet_daily")
+        spark.read.table(f"{BRONZE}.bronze_raw_freshretailnet_daily")
         .select(F.col("dt").alias("date_key"), F.col("holiday_flag"))
         .dropDuplicates(["date_key"])
         .withColumn("day_of_week", F.date_format("date_key", "EEEE"))
@@ -105,7 +113,7 @@ def dim_date():
 
 
 @dp.table(
-    name="fact_sales",
+    name=f"{SILVER}.fact_sales",
     comment="Conformed daily observed demand and estimated revenue fact.",
     cluster_by=["date_key", "store_key"],
 )
@@ -133,7 +141,7 @@ def fact_sales():
 
 
 @dp.table(
-    name="fact_inventory_status",
+    name=f"{SILVER}.fact_inventory_status",
     comment="Conformed daily stockout status fact.",
     cluster_by=["date_key", "store_key"],
 )
@@ -161,7 +169,7 @@ def fact_inventory_status():
 
 
 @dp.table(
-    name="fact_promotion",
+    name=f"{SILVER}.fact_promotion",
     comment="Conformed daily promotion and discount fact.",
     cluster_by=["date_key", "store_key"],
 )
@@ -187,7 +195,7 @@ def fact_promotion():
 
 
 @dp.table(
-    name="fact_external_signal",
+    name=f"{SILVER}.fact_external_signal",
     comment="Conformed daily weather, holiday, and event context.",
     cluster_by=["date_key", "store_key"],
 )
@@ -238,7 +246,7 @@ def fact_external_signal():
 
 
 @dp.materialized_view(
-    name="gold_store_product_stockout_daily",
+    name=f"{GOLD}.gold_store_product_stockout_daily",
     comment="Daily store-product stockout analysis mart for NorthMart planners.",
     cluster_by=["date_key", "region", "category"],
 )
@@ -246,12 +254,12 @@ def fact_external_signal():
 @dp.expect_or_drop("valid_gold_measures", "observed_units >= 0 AND estimated_revenue >= 0 AND lost_sales_proxy >= 0")
 @dp.expect_or_drop("valid_priority_tier", "priority_tier IN ('low', 'medium', 'high', 'critical')")
 def gold_store_product_stockout_daily():
-    sales = spark.read.table("fact_sales").alias("sales")
-    inventory = spark.read.table("fact_inventory_status").alias("inventory")
-    promotion = spark.read.table("fact_promotion").alias("promotion")
-    external = spark.read.table("fact_external_signal").alias("external")
-    stores = spark.read.table("dim_store").alias("stores")
-    products = spark.read.table("dim_product").alias("products")
+    sales = spark.read.table(f"{SILVER}.fact_sales").alias("sales")
+    inventory = spark.read.table(f"{SILVER}.fact_inventory_status").alias("inventory")
+    promotion = spark.read.table(f"{SILVER}.fact_promotion").alias("promotion")
+    external = spark.read.table(f"{SILVER}.fact_external_signal").alias("external")
+    stores = spark.read.table(f"{SILVER}.dim_store").alias("stores")
+    products = spark.read.table(f"{SILVER}.dim_product").alias("products")
 
     joined = (
         sales.join(stores, F.col("sales.store_key") == F.col("stores.store_key"), "inner")

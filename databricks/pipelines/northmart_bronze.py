@@ -12,6 +12,15 @@ from pyspark.sql.types import (
 )
 
 
+# Per-layer fully-qualified prefixes. The pipeline targets a single catalog
+# (set via the `catalog` configuration key) and spans the bronze/silver/gold
+# schemas using fully-qualified dataset names.
+CATALOG = spark.conf.get("catalog")
+BRONZE = f"{CATALOG}.bronze"
+SILVER = f"{CATALOG}.silver"
+GOLD = f"{CATALOG}.gold"
+
+
 RAW_FRESHRETAILNET_SCHEMA = StructType(
     [
         StructField("city_id", LongType(), True),
@@ -92,7 +101,7 @@ def read_csv_stream(dataset_name: str, schema: StructType):
 
 
 @dp.table(
-    name="bronze_raw_freshretailnet_daily",
+    name=f"{BRONZE}.bronze_raw_freshretailnet_daily",
     comment="Raw FreshRetailNet-like daily demand and stockout observations for the NorthMart thin slice.",
     cluster_by=["dt", "store_id"],
 )
@@ -111,7 +120,7 @@ def bronze_raw_freshretailnet_daily():
 
 
 @dp.table(
-    name="bronze_northmart_store_master",
+    name=f"{BRONZE}.bronze_northmart_store_master",
     comment="Raw synthetic NorthMart store master records for the thin slice.",
     cluster_by=["region", "state"],
 )
@@ -126,7 +135,7 @@ def bronze_northmart_store_master():
 
 
 @dp.table(
-    name="bronze_northmart_product_master",
+    name=f"{BRONZE}.bronze_northmart_product_master",
     comment="Raw synthetic NorthMart product master records for the thin slice.",
     cluster_by=["category", "replenishment_class"],
 )
