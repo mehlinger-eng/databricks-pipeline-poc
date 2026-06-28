@@ -39,6 +39,7 @@ def validate_generated_slice(config: ThinSliceConfig) -> None:
             "holiday_flag",
             "activity_flag",
             "batch_id",
+            "batch_seq",
             "ingested_at",
         },
         "raw_freshretailnet_daily",

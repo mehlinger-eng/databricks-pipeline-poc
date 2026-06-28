@@ -56,3 +56,18 @@ Keep overrides within the Phase 1 guardrails:
 PYTHONPATH=src python3 -m northmart_data_prep.generate --source synthetic --stores 8 --products 80 --days 90
 ```
 
+## Replay Batches (Incremental)
+
+To exercise incremental ingestion, late-arriving records, and corrected records,
+generate the slice as time-ordered batches instead of a single file:
+
+```bash
+PYTHONPATH=src python3 -m northmart_data_prep.replay
+```
+
+This writes a seed (60 days), two 15-day increments, and a restatement batch
+(late-arriving + corrected rows) under `data/generated/northmart_replay/`, each
+stamped with a monotonic `batch_seq`. The end-to-end Databricks demonstration is
+orchestrated by `databricks/scripts/run_replay.sh` and documented in
+[docs/databricks-incremental-replay.md](../../docs/databricks-incremental-replay.md).
+

@@ -17,11 +17,13 @@
 
 ## Phase 2: Full Medallion Pipeline
 
-- Expand the source set to sales, inventory, products, stores, promotions, calendar, and external signals.
-- Add data quality checks.
-- Add replay-based incremental ingestion patterns.
-- Add late-arriving and corrected record handling.
-- Package pipeline assets for deployment.
+- [x] Expand the source set to sales, inventory, products, stores, promotions, calendar, and external signals.
+- [x] Add data quality checks (`@dp.expect_or_drop` expectations across layers).
+- [x] Add replay-based incremental ingestion patterns (`databricks/scripts/run_replay.sh`).
+- [x] Add late-arriving and corrected record handling (append-only bronze + latest-wins silver via `batch_seq`).
+- [x] Package pipeline assets for deployment (root `databricks.yml` Asset Bundle).
+
+See [databricks-incremental-replay.md](databricks-incremental-replay.md). A future enhancement is truly incremental silver (streaming dedup / AUTO CDC) rather than cumulative recompute.
 
 ## Phase 3: Serving
 

@@ -2,12 +2,12 @@
 
 This directory contains repo-scaffolded Databricks Lakeflow Declarative Pipeline assets.
 
-The first pipeline is written in PySpark and currently includes bronze, silver, and the first gold mart:
+The first pipeline is written in PySpark and includes bronze, silver, and the first gold mart:
 
 - `northmart_bronze.py`
 - `northmart_silver_gold.py`
 
-It is not deployed yet. The next checkpoint will decide whether to upload generated files to a Unity Catalog volume and run the pipeline.
+It is deployed and run via the root `databricks.yml` Asset Bundle (serverless, `dev` target). See [docs/databricks-deploy-run.md](../../docs/databricks-deploy-run.md) for the deploy/run runbook and [docs/databricks-incremental-replay.md](../../docs/databricks-incremental-replay.md) for the incremental replay demonstration.
 
 ## Expected Raw Volume Layout
 
@@ -44,6 +44,12 @@ Each table uses Auto Loader in CSV mode and adds:
 
 The source-provided `ingested_at` value is preserved and cast to timestamp.
 
+Bronze is an append-only landing log: the raw daily table carries a `batch_seq`
+(monotonic load sequence). Because Auto Loader only ingests newly landed files,
+re-running the pipeline after landing a new batch ingests just that batch. A
+corrected or late-arriving observation lands as an additional row for the same
+grain, preserving full audit history.
+
 ## Silver Tables
 
 The pipeline also creates:
@@ -57,6 +63,12 @@ The pipeline also creates:
 - `fact_external_signal`
 
 Silver tables map encoded public source identifiers to NorthMart business keys, derive planner-friendly measures, and apply simple quality expectations aligned with `data_contracts/`.
+
+Silver also reconciles restatements: a shared `latest_raw()` helper keeps only
+the newest version per `(store, product, date)` grain (ordered by `batch_seq`),
+so corrected and late-arriving records flow through every fact without
+duplicating the grain. Bronze stays incremental; silver/gold recompute
+cumulatively from bronze each run.
 
 The `dim_` and `fact_` prefixes are intentional even though these tables live in the silver layer. In this project, silver is the trusted, conformed, analyst-queryable schema. The prefixes describe modeling role:
 

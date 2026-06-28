@@ -75,6 +75,10 @@ columns:
   - name: batch_id
     type: string
     required: true
+  - name: batch_seq
+    type: bigint
+    required: true
+    description: Monotonic load sequence for the landing batch. Higher wins during silver latest-wins restatement of corrected or late-arriving records.
   - name: ingested_at
     type: timestamp
     required: true

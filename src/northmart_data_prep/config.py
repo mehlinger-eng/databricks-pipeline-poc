@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, field
 from datetime import date
 from pathlib import Path
 
@@ -32,6 +32,51 @@ class ThinSliceConfig:
         values = asdict(self)
         values["start_date"] = self.start_date.isoformat()
         return values
+
+    @property
+    def output_path(self) -> Path:
+        return Path(self.output_root)
+
+
+@dataclass(frozen=True)
+class ReplayConfig:
+    """Plan for replaying the static slice as time-ordered incremental batches.
+
+    The full 90-day slice is split into a seed plus two increments. A final
+    restatement batch arrives out of order to exercise late-arriving and
+    corrected records:
+
+    - Late-arriving: one store's earliest days are withheld from the seed and
+      delivered later, so a previously processed date gains new rows.
+    - Corrected: a deterministic set of already-published keys is re-emitted
+      with materially changed measures and a higher ``batch_seq`` so silver's
+      latest-wins logic restates them.
+    """
+
+    seed_days: int = 60
+    increment_days: tuple[int, ...] = (15, 15)
+    output_root: str = "data/generated/northmart_replay"
+
+    # Late-arriving: source store id whose earliest `late_store_days` are held
+    # back from the seed and delivered in the restatement batch.
+    late_store_id: int = 10007
+    late_store_days: int = 15
+
+    # Corrected: re-emit these source products for `correction_store_id` on the
+    # given day offsets (relative to the slice start) with boosted demand and
+    # forced stockouts to make the restatement visible in gold.
+    correction_store_id: int = 10000
+    correction_product_ids: tuple[int, ...] = (50000, 50001, 50002, 50003, 50004)
+    correction_day_offsets: tuple[int, ...] = (5, 6, 7)
+
+    batches: tuple[tuple[str, int], ...] = field(
+        default_factory=lambda: (
+            ("replay-001-seed", 1),
+            ("replay-002-inc", 2),
+            ("replay-003-inc", 3),
+            ("replay-004-restatement", 4),
+        )
+    )
 
     @property
     def output_path(self) -> Path:

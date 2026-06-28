@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from pyspark import pipelines as dp
 from pyspark.sql import functions as F
+from pyspark.sql.window import Window
 
 
 SERVICE_WINDOW_HOURS = 17
@@ -15,9 +16,29 @@ SILVER = f"{CATALOG}.silver"
 GOLD = f"{CATALOG}.gold"
 
 
+def latest_raw():
+    """Reduce the append-only bronze landing log to the latest version per grain.
+
+    Bronze is an immutable record of everything that landed, so a corrected or
+    late-arriving observation appears as an additional row for the same
+    (store, product, date) grain. Silver keeps only the newest version, ordered
+    by ``batch_seq`` (then ``_loaded_at`` as a tiebreak), so restatements flow
+    through to every downstream fact without duplicating the grain.
+    """
+    dedup_window = Window.partitionBy(
+        "store_id", "product_id", "dt"
+    ).orderBy(F.col("batch_seq").desc_nulls_last(), F.col("_loaded_at").desc_nulls_last())
+    return (
+        spark.read.table(f"{BRONZE}.bronze_raw_freshretailnet_daily")
+        .withColumn("_version_rank", F.row_number().over(dedup_window))
+        .filter(F.col("_version_rank") == 1)
+        .drop("_version_rank")
+    )
+
+
 def raw_with_keys():
     return (
-        spark.read.table(f"{BRONZE}.bronze_raw_freshretailnet_daily").alias("raw")
+        latest_raw().alias("raw")
         .join(
             spark.read.table(f"{BRONZE}.bronze_northmart_store_master").alias("store"),
             F.col("raw.store_id") == F.col("store.source_store_id"),
@@ -91,7 +112,7 @@ def dim_product():
 @dp.expect_or_drop("valid_date_key", "date_key IS NOT NULL")
 def dim_date():
     return (
-        spark.read.table(f"{BRONZE}.bronze_raw_freshretailnet_daily")
+        latest_raw()
         .select(F.col("dt").alias("date_key"), F.col("holiday_flag"))
         .dropDuplicates(["date_key"])
         .withColumn("day_of_week", F.date_format("date_key", "EEEE"))

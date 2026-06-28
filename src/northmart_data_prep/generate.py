@@ -194,13 +194,22 @@ def hourly_stock_status(stockout_hours: int) -> list[int]:
     return status
 
 
-def add_ingestion_metadata(raw_df: pd.DataFrame, config: ThinSliceConfig) -> pd.DataFrame:
+def add_ingestion_metadata(
+    raw_df: pd.DataFrame,
+    config: ThinSliceConfig,
+    batch_id: str | None = None,
+    batch_seq: int = 1,
+    ingested_at: datetime | None = None,
+) -> pd.DataFrame:
     enriched = raw_df.copy()
     enriched["dt"] = pd.to_datetime(enriched["dt"]).dt.date
     enriched["source_dataset"] = config.source_dataset
     enriched["source_split"] = config.source_split
-    enriched["batch_id"] = config.batch_id
-    enriched["ingested_at"] = datetime.now(timezone.utc)
+    enriched["batch_id"] = batch_id if batch_id is not None else config.batch_id
+    # Monotonic load sequence used downstream for deterministic latest-wins
+    # restatement (a corrected record arrives in a later batch with a higher seq).
+    enriched["batch_seq"] = batch_seq
+    enriched["ingested_at"] = ingested_at if ingested_at is not None else datetime.now(timezone.utc)
     return enriched
 
 

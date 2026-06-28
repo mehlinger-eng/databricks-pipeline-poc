@@ -45,6 +45,7 @@ RAW_FRESHRETAILNET_SCHEMA = StructType(
         StructField("source_dataset", StringType(), True),
         StructField("source_split", StringType(), True),
         StructField("batch_id", StringType(), True),
+        StructField("batch_seq", LongType(), True),
         StructField("ingested_at", StringType(), True),
     ]
 )
