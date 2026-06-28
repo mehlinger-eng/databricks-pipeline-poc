@@ -10,10 +10,13 @@ FreshRetailNet-50K is a behavioral anchor. It is not treated as literal NorthMar
 
 - Preserve raw source fields in bronze.
 - Create stable NorthMart business keys in silver.
+- Use `dim_` and `fact_` names in silver when they describe analyst-ready conformed dimensions and facts.
 - Do not expose encoded public source identifiers directly in gold unless needed for debugging.
 - Treat FreshRetailNet sales values as normalized demand signals, not literal dollars.
 - Derive NorthMart estimated revenue from normalized demand and synthetic product pricing.
 - Defer incremental replay fields until after the static thin slice works.
+
+Silver is queryable by analysts. Gold is the preferred layer for curated dashboards, decision marts, and stakeholder-facing outputs.
 
 ## Public Source Fields
 

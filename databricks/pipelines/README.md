@@ -58,6 +58,13 @@ The pipeline also creates:
 
 Silver tables map encoded public source identifiers to NorthMart business keys, derive planner-friendly measures, and apply simple quality expectations aligned with `data_contracts/`.
 
+The `dim_` and `fact_` prefixes are intentional even though these tables live in the silver layer. In this project, silver is the trusted, conformed, analyst-queryable schema. The prefixes describe modeling role:
+
+- `dim_*`: conformed descriptive entities.
+- `fact_*`: conformed measurable events or daily observations.
+
+Gold remains the curated decision layer.
+
 ## Gold Mart
 
 The first gold mart is:

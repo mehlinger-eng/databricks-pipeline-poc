@@ -43,6 +43,8 @@ Bronze should preserve source shape and add ingestion metadata such as source na
 
 ## Silver Entities
 
+Silver tables are analyst-ready conformed dimensions and facts. The `dim_` and `fact_` prefixes describe modeling role, not gold-layer ownership.
+
 - `dim_store`
 - `dim_product`
 - `dim_date`
@@ -52,6 +54,8 @@ Bronze should preserve source shape and add ingestion metadata such as source na
 - `fact_external_signal`
 
 Silver should enforce types, normalize identifiers, remove duplicates, and align source records to NorthMart store, product, and date keys.
+
+Analysts can query silver directly for exploration, QA, and new mart development. Gold tables remain the preferred surface for curated dashboards and stakeholder-facing decisions.
 
 ## First Gold Mart
 

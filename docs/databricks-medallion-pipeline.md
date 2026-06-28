@@ -11,6 +11,26 @@ The pipeline is still source-control only. It has not been deployed to Databrick
 - `databricks/pipelines/northmart_bronze.py`: bronze ingestion from future Unity Catalog volume paths.
 - `databricks/pipelines/northmart_silver_gold.py`: silver conformance and the first gold stockout mart.
 
+## Layer Naming Convention
+
+NorthMart uses medallion schemas plus modeling-role table names:
+
+```text
+<catalog>.bronze.bronze_raw_freshretailnet_daily
+<catalog>.silver.dim_store
+<catalog>.silver.dim_product
+<catalog>.silver.fact_sales
+<catalog>.gold.gold_store_product_stockout_daily
+```
+
+The `dim_` and `fact_` prefixes are intentional in silver. They describe the table's analytical role, not its serving tier.
+
+- Bronze tables are source-shaped and ingestion-oriented.
+- Silver tables are trusted, conformed, quality-checked, and analyst-queryable.
+- Gold tables are curated, decision-ready marts for dashboards, stakeholder workflows, and model-serving outputs.
+
+Analysts can query silver directly for exploration and QA. Business dashboards should default to gold unless they need flexible analysis over conformed building blocks.
+
 ## Medallion Flow
 
 ```text
