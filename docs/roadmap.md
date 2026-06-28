@@ -28,8 +28,10 @@ See [databricks-incremental-replay.md](databricks-incremental-replay.md). A futu
 ## Phase 3: Serving
 
 - Create SQL marts for operations, inventory planning, and merchandising.
-- Build an AI/BI dashboard.
+- [x] Build an AI/BI dashboard (`sql/dashboards/northmart_stockout_overview.lvdash.json`, deployed via the bundle).
 - Evaluate whether a Databricks App adds enough value to justify custom code.
+
+See [databricks-serving-dashboard.md](databricks-serving-dashboard.md).
 
 ## Phase 4: ML
 

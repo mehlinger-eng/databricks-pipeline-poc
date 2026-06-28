@@ -1,0 +1,373 @@
+{
+  "datasets": [
+    {
+      "name": "ds_mart",
+      "displayName": "Stockout mart (row level)",
+      "queryLines": [
+        "SELECT ",
+        "  store_key, product_key, date_key, region, store_format, ",
+        "  category, subcategory, replenishment_class, ",
+        "  observed_units, estimated_revenue, stockout_hours, ",
+        "  stockout_flag, CAST(stockout_flag AS INT) AS stockout_int, ",
+        "  promotion_flag, discount_rate, is_holiday, demand_signal_bucket, ",
+        "  lost_sales_proxy, stockout_risk_score, priority_tier, ",
+        "  CASE WHEN priority_tier = 'critical' THEN 1 ELSE 0 END AS critical_int ",
+        "FROM northmart.gold.gold_store_product_stockout_daily"
+      ]
+    },
+    {
+      "name": "ds_top_offenders",
+      "displayName": "Top stockout offenders",
+      "queryLines": [
+        "SELECT ",
+        "  store_key, product_key, date_key, region, category, ",
+        "  stockout_hours, estimated_revenue, lost_sales_proxy, priority_tier ",
+        "FROM northmart.gold.gold_store_product_stockout_daily ",
+        "WHERE priority_tier IN ('critical', 'high') ",
+        "ORDER BY lost_sales_proxy DESC ",
+        "LIMIT 50"
+      ]
+    }
+  ],
+  "pages": [
+    {
+      "name": "overview",
+      "displayName": "Overview",
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layoutVersion": "GRID_V1",
+      "layout": [
+        {
+          "widget": {
+            "name": "title",
+            "multilineTextboxSpec": {
+              "lines": ["## NorthMart Stockout & Lost-Sales Overview"]
+            }
+          },
+          "position": {"x": 0, "y": 0, "width": 12, "height": 1}
+        },
+        {
+          "widget": {
+            "name": "subtitle",
+            "multilineTextboxSpec": {
+              "lines": ["Daily store-product stockout exposure and estimated lost-sales impact for inventory planners. Use the Filters page to focus by region, category, or priority tier."]
+            }
+          },
+          "position": {"x": 0, "y": 1, "width": 12, "height": 1}
+        },
+        {
+          "widget": {
+            "name": "kpi-lost-sales",
+            "queries": [{
+              "name": "main_query",
+              "query": {
+                "datasetName": "ds_mart",
+                "fields": [{"name": "sum(lost_sales_proxy)", "expression": "SUM(`lost_sales_proxy`)"}],
+                "disaggregated": false
+              }
+            }],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {"fieldName": "sum(lost_sales_proxy)", "displayName": "Total Lost-Sales Proxy"}
+              },
+              "frame": {"title": "Total Lost-Sales Proxy", "showTitle": true}
+            }
+          },
+          "position": {"x": 0, "y": 2, "width": 4, "height": 3}
+        },
+        {
+          "widget": {
+            "name": "kpi-stockout-rate",
+            "queries": [{
+              "name": "main_query",
+              "query": {
+                "datasetName": "ds_mart",
+                "fields": [{"name": "avg(stockout_int)", "expression": "AVG(`stockout_int`)"}],
+                "disaggregated": false
+              }
+            }],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {"fieldName": "avg(stockout_int)", "displayName": "Stockout Rate", "format": {"type": "number-percent", "decimalPlaces": {"places": 1}}}
+              },
+              "frame": {"title": "Stockout Rate", "showTitle": true}
+            }
+          },
+          "position": {"x": 4, "y": 2, "width": 4, "height": 3}
+        },
+        {
+          "widget": {
+            "name": "kpi-critical",
+            "queries": [{
+              "name": "main_query",
+              "query": {
+                "datasetName": "ds_mart",
+                "fields": [{"name": "sum(critical_int)", "expression": "SUM(`critical_int`)"}],
+                "disaggregated": false
+              }
+            }],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {"fieldName": "sum(critical_int)", "displayName": "Critical Tier Rows"}
+              },
+              "frame": {"title": "Critical Tier Rows", "showTitle": true}
+            }
+          },
+          "position": {"x": 8, "y": 2, "width": 4, "height": 3}
+        },
+        {
+          "widget": {
+            "name": "section-exposure",
+            "multilineTextboxSpec": {
+              "lines": ["### Where is the exposure?"]
+            }
+          },
+          "position": {"x": 0, "y": 5, "width": 12, "height": 1}
+        },
+        {
+          "widget": {
+            "name": "lost-sales-by-region",
+            "queries": [{
+              "name": "main_query",
+              "query": {
+                "datasetName": "ds_mart",
+                "fields": [
+                  {"name": "region", "expression": "`region`"},
+                  {"name": "sum(lost_sales_proxy)", "expression": "SUM(`lost_sales_proxy`)"}
+                ],
+                "disaggregated": false
+              }
+            }],
+            "spec": {
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {"fieldName": "region", "scale": {"type": "categorical"}, "displayName": "Region"},
+                "y": {"fieldName": "sum(lost_sales_proxy)", "scale": {"type": "quantitative"}, "displayName": "Lost-Sales Proxy"}
+              },
+              "frame": {"title": "Lost-Sales Proxy by Region", "showTitle": true}
+            }
+          },
+          "position": {"x": 0, "y": 6, "width": 6, "height": 5}
+        },
+        {
+          "widget": {
+            "name": "lost-sales-by-category",
+            "queries": [{
+              "name": "main_query",
+              "query": {
+                "datasetName": "ds_mart",
+                "fields": [
+                  {"name": "category", "expression": "`category`"},
+                  {"name": "sum(lost_sales_proxy)", "expression": "SUM(`lost_sales_proxy`)"}
+                ],
+                "disaggregated": false
+              }
+            }],
+            "spec": {
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {"fieldName": "category", "scale": {"type": "categorical"}, "displayName": "Category"},
+                "y": {"fieldName": "sum(lost_sales_proxy)", "scale": {"type": "quantitative"}, "displayName": "Lost-Sales Proxy"}
+              },
+              "frame": {"title": "Lost-Sales Proxy by Category", "showTitle": true}
+            }
+          },
+          "position": {"x": 6, "y": 6, "width": 6, "height": 5}
+        },
+        {
+          "widget": {
+            "name": "section-trend",
+            "multilineTextboxSpec": {
+              "lines": ["### Trend and priority mix"]
+            }
+          },
+          "position": {"x": 0, "y": 11, "width": 12, "height": 1}
+        },
+        {
+          "widget": {
+            "name": "lost-sales-trend",
+            "queries": [{
+              "name": "main_query",
+              "query": {
+                "datasetName": "ds_mart",
+                "fields": [
+                  {"name": "daily(date_key)", "expression": "DATE_TRUNC(\"DAY\", `date_key`)"},
+                  {"name": "sum(lost_sales_proxy)", "expression": "SUM(`lost_sales_proxy`)"}
+                ],
+                "disaggregated": false
+              }
+            }],
+            "spec": {
+              "version": 3,
+              "widgetType": "line",
+              "encodings": {
+                "x": {"fieldName": "daily(date_key)", "scale": {"type": "temporal"}, "displayName": "Date"},
+                "y": {"fieldName": "sum(lost_sales_proxy)", "scale": {"type": "quantitative"}, "displayName": "Lost-Sales Proxy"}
+              },
+              "frame": {"title": "Daily Lost-Sales Proxy", "showTitle": true}
+            }
+          },
+          "position": {"x": 0, "y": 12, "width": 6, "height": 5}
+        },
+        {
+          "widget": {
+            "name": "priority-mix",
+            "queries": [{
+              "name": "main_query",
+              "query": {
+                "datasetName": "ds_mart",
+                "fields": [
+                  {"name": "priority_tier", "expression": "`priority_tier`"},
+                  {"name": "count(rows)", "expression": "COUNT(`store_key`)"}
+                ],
+                "disaggregated": false
+              }
+            }],
+            "spec": {
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {"fieldName": "priority_tier", "scale": {"type": "categorical"}, "displayName": "Priority Tier"},
+                "y": {"fieldName": "count(rows)", "scale": {"type": "quantitative"}, "displayName": "Rows"}
+              },
+              "frame": {"title": "Rows by Priority Tier", "showTitle": true}
+            }
+          },
+          "position": {"x": 6, "y": 12, "width": 6, "height": 5}
+        },
+        {
+          "widget": {
+            "name": "section-offenders",
+            "multilineTextboxSpec": {
+              "lines": ["### Top stockout offenders (critical and high)"]
+            }
+          },
+          "position": {"x": 0, "y": 17, "width": 12, "height": 1}
+        },
+        {
+          "widget": {
+            "name": "top-offenders-table",
+            "queries": [{
+              "name": "main_query",
+              "query": {
+                "datasetName": "ds_top_offenders",
+                "fields": [
+                  {"name": "store_key", "expression": "`store_key`"},
+                  {"name": "product_key", "expression": "`product_key`"},
+                  {"name": "date_key", "expression": "`date_key`"},
+                  {"name": "region", "expression": "`region`"},
+                  {"name": "category", "expression": "`category`"},
+                  {"name": "stockout_hours", "expression": "`stockout_hours`"},
+                  {"name": "estimated_revenue", "expression": "`estimated_revenue`"},
+                  {"name": "lost_sales_proxy", "expression": "`lost_sales_proxy`"},
+                  {"name": "priority_tier", "expression": "`priority_tier`"}
+                ],
+                "disaggregated": true
+              }
+            }],
+            "spec": {
+              "version": 2,
+              "widgetType": "table",
+              "encodings": {
+                "columns": [
+                  {"fieldName": "store_key", "displayName": "Store"},
+                  {"fieldName": "product_key", "displayName": "Product"},
+                  {"fieldName": "date_key", "displayName": "Date"},
+                  {"fieldName": "region", "displayName": "Region"},
+                  {"fieldName": "category", "displayName": "Category"},
+                  {"fieldName": "stockout_hours", "displayName": "Stockout Hrs"},
+                  {"fieldName": "estimated_revenue", "displayName": "Est. Revenue"},
+                  {"fieldName": "lost_sales_proxy", "displayName": "Lost-Sales Proxy"},
+                  {"fieldName": "priority_tier", "displayName": "Priority"}
+                ]
+              },
+              "frame": {"title": "Top 50 by Lost-Sales Proxy", "showTitle": true}
+            }
+          },
+          "position": {"x": 0, "y": 18, "width": 12, "height": 8}
+        }
+      ]
+    },
+    {
+      "name": "filters",
+      "displayName": "Filters",
+      "pageType": "PAGE_TYPE_GLOBAL_FILTERS",
+      "layoutVersion": "GRID_V1",
+      "layout": [
+        {
+          "widget": {
+            "name": "filter-region",
+            "queries": [{
+              "name": "ds_mart_region",
+              "query": {
+                "datasetName": "ds_mart",
+                "fields": [{"name": "region", "expression": "`region`"}],
+                "disaggregated": false
+              }
+            }],
+            "spec": {
+              "version": 2,
+              "widgetType": "filter-multi-select",
+              "encodings": {
+                "fields": [{"fieldName": "region", "displayName": "Region", "queryName": "ds_mart_region"}]
+              },
+              "frame": {"title": "Region", "showTitle": true}
+            }
+          },
+          "position": {"x": 0, "y": 0, "width": 4, "height": 2}
+        },
+        {
+          "widget": {
+            "name": "filter-category",
+            "queries": [{
+              "name": "ds_mart_category",
+              "query": {
+                "datasetName": "ds_mart",
+                "fields": [{"name": "category", "expression": "`category`"}],
+                "disaggregated": false
+              }
+            }],
+            "spec": {
+              "version": 2,
+              "widgetType": "filter-multi-select",
+              "encodings": {
+                "fields": [{"fieldName": "category", "displayName": "Category", "queryName": "ds_mart_category"}]
+              },
+              "frame": {"title": "Category", "showTitle": true}
+            }
+          },
+          "position": {"x": 4, "y": 0, "width": 4, "height": 2}
+        },
+        {
+          "widget": {
+            "name": "filter-priority",
+            "queries": [{
+              "name": "ds_mart_priority",
+              "query": {
+                "datasetName": "ds_mart",
+                "fields": [{"name": "priority_tier", "expression": "`priority_tier`"}],
+                "disaggregated": false
+              }
+            }],
+            "spec": {
+              "version": 2,
+              "widgetType": "filter-multi-select",
+              "encodings": {
+                "fields": [{"fieldName": "priority_tier", "displayName": "Priority Tier", "queryName": "ds_mart_priority"}]
+              },
+              "frame": {"title": "Priority Tier", "showTitle": true}
+            }
+          },
+          "position": {"x": 8, "y": 0, "width": 4, "height": 2}
+        }
+      ]
+    }
+  ]
+}

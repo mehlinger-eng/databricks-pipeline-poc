@@ -14,6 +14,9 @@ variables:
   raw_data_path:
     description: Base path under the landing volume for thin-slice datasets.
     default: /Volumes/${var.catalog}/bronze/${var.raw_volume}/northmart_thin_slice
+  warehouse_id:
+    description: Serverless SQL warehouse that backs the AI/BI serving dashboard.
+    default: 68492bc2dc184d9a
 
 include:
   - databricks/workflows/*.yml

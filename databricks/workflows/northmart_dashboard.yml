@@ -1,0 +1,14 @@
+# Databricks Asset Bundle resource for the NorthMart AI/BI (Lakeview) serving
+# dashboard. Included from the root databricks.yml via the workflows/*.yml glob.
+#
+# The dashboard JSON is version-controlled at sql/dashboards/. file_path is
+# relative to this resource file, so ../../ reaches the repo root. All datasets
+# query the gold mart with fully-qualified names, backed by the serverless SQL
+# warehouse.
+
+resources:
+  dashboards:
+    northmart_stockout_overview:
+      display_name: "NorthMart Stockout & Lost-Sales Overview"
+      file_path: ../../sql/dashboards/northmart_stockout_overview.lvdash.json
+      warehouse_id: ${var.warehouse_id}
